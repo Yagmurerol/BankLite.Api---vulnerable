@@ -86,13 +86,35 @@ public class AuthController : ControllerBase
             role = user.Role
         });
     }
+  [Authorize]
+[HttpGet("users")]
+public IActionResult GetUsers()
+{
+    var userId = User.FindFirst("id")?.Value;
+
+    var user = _db.Users.FirstOrDefault(x => x.Id.ToString() == userId);
+
+    if (user == null || user.Role != "Admin")
+        return Forbid();
+
+    var users = _db.Users
+        .Select(u => new {
+            u.Id,
+            u.Username,
+            u.FullName
+        })
+        .ToList();
+
+    return Ok(users);
+}
 
     // ✅ FIXED: Eski şifre kontrol edilir
     [Authorize]
     [HttpPost("change-password")]
     public async Task<ActionResult> ChangePassword(ChangePasswordRequest req)
     {
-        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        var userIdClaim = User.FindFirst("id")?.Value
+            ?? User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out var userId))
             return Unauthorized();
 
@@ -123,11 +145,12 @@ public class AuthController : ControllerBase
     public async Task<ActionResult> UpdateUser(int userId, UpdateUserRequest req)
     {
         // ✅ FIXED: Token'daki kullanıcı ID'si kontrol ediliyor - sadece kendi profili düzenlenebilir
-        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        var userIdClaim = User.FindFirst("id")?.Value
+            ?? User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out var currentUserId))
             return Unauthorized();
 
-        if (currentUserId != userId)
+        if (currentUserId != userId && !User.IsInRole("Admin"))
             return Forbid("You can only update your own profile");
 
         var user = await _db.Users.FindAsync(userId);

@@ -17,7 +17,8 @@ namespace BankLite.Api.Controllers
             _alertService = alertService;
         }
 
-        private int UserId => int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        private int UserId => int.Parse(User.FindFirst("id")?.Value
+            ?? User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
         [HttpGet]
         public async Task<ActionResult> GetAlerts()

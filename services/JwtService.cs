@@ -21,6 +21,7 @@ namespace BankLite.Api.Services
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new Claim("id", user.Id.ToString()),
                 new Claim(ClaimTypes.Name, user.Username),
                 new Claim("fullName", user.FullName),
                 new Claim(ClaimTypes.Role, user.Role)

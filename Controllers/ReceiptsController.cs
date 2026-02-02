@@ -21,7 +21,8 @@ namespace BankLite.Api.Controllers
             _logger = logger;
         }
 
-        private int UserId => int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        private int UserId => int.Parse(User.FindFirst("id")?.Value
+            ?? User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
         // GET: /api/Receipts/{transferId}
         [HttpGet("{transferId:int}")]

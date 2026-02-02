@@ -23,7 +23,8 @@ namespace BankLite.Api.Controllers
         private bool TryGetUserId(out int userId)
         {
             userId = 0;
-            var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var userIdStr = User.FindFirst("id")?.Value
+                ?? User.FindFirstValue(ClaimTypes.NameIdentifier);
             return int.TryParse(userIdStr, out userId);
         }
 
