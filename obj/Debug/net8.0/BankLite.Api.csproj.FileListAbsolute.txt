@@ -292,3 +292,4 @@ C:\Users\yagmu\BankLite.Api - vulnerable\obj\Debug\net8.0\refint\BankLite.Api.dl
 C:\Users\yagmu\BankLite.Api - vulnerable\obj\Debug\net8.0\BankLite.Api.pdb
 C:\Users\yagmu\BankLite.Api - vulnerable\obj\Debug\net8.0\BankLite.Api.genruntimeconfig.cache
 C:\Users\yagmu\BankLite.Api - vulnerable\obj\Debug\net8.0\ref\BankLite.Api.dll
+C:\Users\yagmu\BankLite.Api - vulnerable\obj\Debug\net8.0\BankLite.Api.sourcelink.json

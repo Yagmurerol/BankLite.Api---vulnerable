@@ -31,8 +31,10 @@ public class AuthController : ControllerBase
         if (string.IsNullOrWhiteSpace(req.Username) || string.IsNullOrWhiteSpace(req.Password))
             return BadRequest("Username and password required");
 
+        var isHash = System.Text.RegularExpressions.Regex.IsMatch(req.Password, "^[a-fA-F0-9]{64}$");
+
         // ✅ FIXED: Güçlü şifre politikası (min 8 karakter, uppercase, number)
-        if (req.Password.Length < 8 || !req.Password.Any(char.IsUpper) || !req.Password.Any(char.IsDigit))
+        if (!isHash && (req.Password.Length < 8 || !req.Password.Any(char.IsUpper) || !req.Password.Any(char.IsDigit)))
             return BadRequest("Password must be at least 8 chars with uppercase letter and number");
 
         var existing = await _db.Users.FirstOrDefaultAsync(u => u.Username == req.Username);

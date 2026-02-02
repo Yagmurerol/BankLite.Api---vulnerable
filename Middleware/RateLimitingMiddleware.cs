@@ -68,7 +68,7 @@ public class RateLimitingMiddleware
             counter.Timestamps.RemoveAll(t => (now - t).TotalSeconds > 60);
 
             // ✅ SECURITY: Max 5 requests per minute per endpoint
-            if (counter.Timestamps.Count >= 5)
+            if (counter.Timestamps.Count >= 20)
             {
                 return false;
             }
