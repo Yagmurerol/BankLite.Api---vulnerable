@@ -38,7 +38,10 @@ public class AuthController : ControllerBase
             return BadRequest("Password must be at least 8 chars with uppercase letter and number");
 
         var existing = await _db.Users.FirstOrDefaultAsync(u => u.Username == req.Username);
-        if (existing != null) return BadRequest("Username already taken");
+        
+        // ✅ SECURITY FIX: Generic mesaj - kullanıcı varlığını sızdırma
+        if (existing != null) 
+            return BadRequest("Registration failed. Please check your information and try again.");
 
         // ✅ FIXED: Role sadece "User" olarak atanıyor (Mass Assignment engellendi)
         var user = new User
@@ -92,10 +95,15 @@ public IActionResult GetUsers()
 {
     var userId = User.FindFirst("id")?.Value;
 
+    // ✅ SECURITY FIX: Admin kontrolü DATABASE'den yapılıyor, token'dan DEĞİL
     var user = _db.Users.FirstOrDefault(x => x.Id.ToString() == userId);
 
-    if (user == null || user.Role != "Admin")
-        return Forbid();
+    if (user == null)
+        return Unauthorized("User not found");
+
+    // ✅ Critical: Check role from database, not from JWT claims
+    if (user.Role != "Admin")
+        return Forbid("Only admins can access this resource");
 
     var users = _db.Users
         .Select(u => new {
@@ -144,13 +152,19 @@ public IActionResult GetUsers()
     [HttpPut("users/{userId}")]
     public async Task<ActionResult> UpdateUser(int userId, UpdateUserRequest req)
     {
-        // ✅ FIXED: Token'daki kullanıcı ID'si kontrol ediliyor - sadece kendi profili düzenlenebilir
+        // ✅ FIXED: Token'daki kullanıcı ID'si kontrol ediliyor
         var userIdClaim = User.FindFirst("id")?.Value
             ?? User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out var currentUserId))
             return Unauthorized();
 
-        if (currentUserId != userId && !User.IsInRole("Admin"))
+        // ✅ SECURITY FIX: Admin kontrolü DATABASE'den yapılıyor, token'dan DEĞİL
+        var currentUser = await _db.Users.FindAsync(currentUserId);
+        if (currentUser is null)
+            return Unauthorized("Current user not found");
+
+        // Admin olmayan kullanıcılar sadece kendi profilini düzenleyebilir
+        if (currentUser.Role != "Admin" && currentUserId != userId)
             return Forbid("You can only update your own profile");
 
         var user = await _db.Users.FindAsync(userId);
@@ -167,7 +181,7 @@ public IActionResult GetUsers()
         if (!string.IsNullOrWhiteSpace(req.FullName))
             user.FullName = req.FullName;
 
-        // Küçük not: req.Role gönderilse bile yoksayılır
+        // ✅ SECURITY: Role alanı DTO'dan tamamen kaldırıldı - asla set edilemez
 
         await _db.SaveChangesAsync();
 
