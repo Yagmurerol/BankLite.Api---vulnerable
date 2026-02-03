@@ -20,8 +20,8 @@ namespace BankLite.Api.Services
         }
 
         /// <summary>
-        /// Obfuscate a numeric ID into a hashed string (base62)
-        /// Example: 1 -> "A7kM2nQ9B3xV"
+        /// Obfuscate a numeric ID into a hashed string
+        /// Example: 1 -> "a7km2nq9b3xv1f2e"
         /// </summary>
         public string Obfuscate(int id)
         {
@@ -32,8 +32,10 @@ namespace BankLite.Api.Services
             using var sha = SHA256.Create();
             var hash = sha.ComputeHash(Encoding.UTF8.GetBytes(combined));
             
-            // Convert to base62 for shorter, URL-safe representation
-            return Base62Encode(hash).Substring(0, MinHashLength);
+            // Convert to hex string (32 chars for SHA256) - simple and always sufficient length
+            var hex = Convert.ToHexString(hash).ToLowerInvariant();
+            // Take first 16 characters for shorter obfuscated ID
+            return hex.Substring(0, Math.Min(16, hex.Length));
         }
 
         /// <summary>
@@ -49,24 +51,6 @@ namespace BankLite.Api.Services
             {
                 return false;
             }
-        }
-
-        private static string Base62Encode(byte[] bytes)
-        {
-            const string chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-            var result = new StringBuilder();
-            
-            var num = new System.Numerics.BigInteger(bytes);
-            var baseNum = new System.Numerics.BigInteger(62);
-
-            while (num > 0)
-            {
-                var remainder = (int)(num % baseNum);
-                result.Insert(0, chars[remainder]);
-                num /= baseNum;
-            }
-
-            return result.Length == 0 ? "0" : result.ToString();
         }
     }
 }
