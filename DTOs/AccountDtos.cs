@@ -18,7 +18,7 @@ namespace BankLite.Api.Dtos
     );
 
     public record AccountResponse(
-        int Id,
+        string Id,  // ✅ SECURITY: Obfuscated ID to prevent enumeration attacks
         string Name,
         string Iban,
         string Currency,
