@@ -106,14 +106,16 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("Secure", policy =>
     {
-        policy.WithOrigins(
+        policy
+            .WithOrigins(
                 "http://localhost:4200",
                 "https://localhost:4200",
                 "http://localhost:50076",
                 "https://localhost:50076")
-              .AllowAnyHeader()
-              .AllowAnyMethod()
-              .AllowCredentials(); // If using cookies/authentication
+            .WithMethods("GET", "POST", "OPTIONS", "DELETE", "PUT")  // ✅ Only necessary methods
+            .WithHeaders("Content-Type", "Authorization")            // ✅ Only necessary headers
+            .AllowCredentials()
+            .WithExposedHeaders("Content-Length", "Content-Type");
     });
 });
 
