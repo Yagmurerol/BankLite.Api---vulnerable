@@ -8,20 +8,22 @@ namespace BankLite.Api.Services
     public class AccountService
     {
         private readonly BankLiteDbContext _db;
+        private readonly IdObfuscationService _obfuscation;
 
-        public AccountService(BankLiteDbContext db)
+        public AccountService(BankLiteDbContext db, IdObfuscationService obfuscation)
         {
             _db = db;
+            _obfuscation = obfuscation;
         }
 
-        // ✅ HESAPLARI LİSTELE
+        // ✅ HESAPLARI LİSTELE (with obfuscated IDs)
         public async Task<List<AccountResponse>> ListAsync(int userId)
         {
             return await _db.Accounts
                 .Where(a => a.UserId == userId)
                 .OrderByDescending(a => a.Id)
                 .Select(a => new AccountResponse(
-                    a.Id,
+                    _obfuscation.Obfuscate(a.Id),  // ✅ Obfuscate ID
                     a.Name,
                     a.Iban,
                     a.Currency,
@@ -70,7 +72,7 @@ namespace BankLite.Api.Services
                     await _db.SaveChangesAsync();
 
                     return new AccountResponse(
-                        acc.Id,
+                        _obfuscation.Obfuscate(acc.Id),  // ✅ Obfuscate ID
                         acc.Name,
                         acc.Iban,
                         acc.Currency,

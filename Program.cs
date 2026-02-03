@@ -40,6 +40,8 @@ builder.Services.AddScoped<ReceiptService>();
 builder.Services.AddScoped<TermDepositService>();
 builder.Services.AddScoped<TransferService>();
 builder.Services.AddScoped<TwoFactorService>();
+// ✅ SECURITY: ID Obfuscation Service - prevents ID enumeration attacks
+builder.Services.AddScoped<IdObfuscationService>();
 
 // JWT Auth
 var jwtKey = builder.Configuration["Jwt:Key"];
@@ -149,6 +151,10 @@ app.Use(async (context, next) =>
     context.Response.Headers.Add("X-Frame-Options", "DENY");
     context.Response.Headers.Add("X-XSS-Protection", "1; mode=block");
     context.Response.Headers.Add("Referrer-Policy", "strict-origin-when-cross-origin");
+    // ✅ SECURITY: Content Security Policy - prevents XSS and injection attacks
+    context.Response.Headers.Add("Content-Security-Policy", "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https:; frame-ancestors 'none'; base-uri 'self'; form-action 'self'");
+    // ✅ SECURITY: Permissions Policy - restricts browser features
+    context.Response.Headers.Add("Permissions-Policy", "geolocation=(), microphone=(), camera=(), payment=()");
     await next();
 });
 
