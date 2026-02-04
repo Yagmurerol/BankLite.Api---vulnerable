@@ -7,6 +7,11 @@ namespace BankLite.Api.Dtos
         [Required]
         [Range(1, int.MaxValue, ErrorMessage = "Invalid account ID")]
         int FromAccountId,
+
+        [Required(ErrorMessage = "Recipient name is required")]
+        [StringLength(100, MinimumLength = 2, ErrorMessage = "Recipient name must be between 2 and 100 characters")]
+        [RegularExpression(@"^[\p{L}\s.'-]+$", ErrorMessage = "Recipient name contains invalid characters")]
+        string ToName,
         
         [Required(ErrorMessage = "Recipient IBAN is required")]
         [StringLength(34, MinimumLength = 26, ErrorMessage = "IBAN must be between 26 and 34 characters")]

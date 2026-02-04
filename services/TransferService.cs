@@ -2,6 +2,7 @@
 using BankLite.Api.Dtos;
 using BankLite.Api.Models;
 using Microsoft.EntityFrameworkCore;
+using System.Text.RegularExpressions;
 
 namespace BankLite.Api.Services
 {
@@ -34,6 +35,13 @@ namespace BankLite.Api.Services
         {
             if (req.Amount <= 0) throw new InvalidOperationException("Amount must be > 0");
 
+            var toName = (req.ToName ?? string.Empty).Trim();
+            if (toName.Length < 2 || toName.Length > 100)
+                throw new InvalidOperationException("Recipient name invalid");
+
+            if (!Regex.IsMatch(toName, @"^[\p{L}\s.'-]+$"))
+                throw new InvalidOperationException("Recipient name invalid");
+
             var toIban = _iban.Normalize(req.ToIban);
             if (!_iban.LooksValidTr(toIban)) throw new InvalidOperationException("Invalid IBAN");
 
@@ -47,6 +55,14 @@ namespace BankLite.Api.Services
             if (toAcc is null) throw new InvalidOperationException("Hedef IBAN bulunamadı");
             if (toAcc.IsClosed) throw new InvalidOperationException("Hedef hesap kapalı");
             if (toAcc.Currency != from.Currency) throw new InvalidOperationException("Para birimi farklı (MVP’de engelli)");
+            if (toAcc.Id == from.Id) throw new InvalidOperationException("Gönderen ve alıcı aynı olamaz");
+
+            var toUser = await _db.Users.FirstOrDefaultAsync(u => u.Id == toAcc.UserId);
+            if (toUser is null) throw new InvalidOperationException("Hedef kullanıcı bulunamadı");
+
+            var expectedName = NormalizeName(toUser.FullName ?? toUser.Username);
+            if (NormalizeName(toName) != expectedName)
+                throw new InvalidOperationException("Alıcı adı IBAN ile eşleşmiyor");
 
             var t = new Transfer
             {
@@ -80,6 +96,12 @@ namespace BankLite.Api.Services
             }
 
             return new InitiateTransferResponse(t.Id, t.OtpRequired, hint);
+        }
+
+        private static string NormalizeName(string name)
+        {
+            var trimmed = name.Trim();
+            return Regex.Replace(trimmed, @"\s+", " ").ToUpperInvariant();
         }
 
         public async Task CompleteAsync(int userId, int transferId, string? otp)
