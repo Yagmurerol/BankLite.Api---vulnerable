@@ -89,5 +89,11 @@ namespace BankLite.Api.Services
             _db.Alerts.RemoveRange(alerts);
             await _db.SaveChangesAsync();
         }
+
+        public async Task CreateAccountOpenedAlertAsync(int userId, string accountName, string currency, decimal initialBalance)
+        {
+            var message = $"Yeni hesabınız başarıyla açıldı! Hesap: {accountName}, Para Birimi: {currency}, Başlangıç Bakiyesi: {initialBalance:N2} {currency}";
+            await CreateAlertAsync(userId, AlertType.Info, "🎉 Yeni Hesap Açıldı", message);
+        }
     }
 }

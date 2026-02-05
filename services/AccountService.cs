@@ -8,9 +8,12 @@ namespace BankLite.Api.Services
     public class AccountService
     {
         private readonly BankLiteDbContext _db;
-        public AccountService(BankLiteDbContext db)
+        private readonly AlertService _alerts;
+        
+        public AccountService(BankLiteDbContext db, AlertService alerts)
         {
             _db = db;
+            _alerts = alerts;
         }
 
         // ✅ HESAPLARI LİSTELE (with obfuscated IDs)
@@ -67,6 +70,9 @@ namespace BankLite.Api.Services
                 try
                 {
                     await _db.SaveChangesAsync();
+
+                    // Alert oluştur
+                    await _alerts.CreateAccountOpenedAlertAsync(userId, acc.Name, acc.Currency, acc.Balance);
 
                     return new AccountResponse(
                         acc.Id,
