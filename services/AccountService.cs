@@ -99,19 +99,18 @@ namespace BankLite.Api.Services
                 .FirstOrDefaultAsync(a => a.Id == accountId && a.UserId == userId);
 
             if (acc == null)
-                throw new Exception("Hesap bulunamadı");
+                throw new InvalidOperationException("Hesap bulunamadı");
 
             if (acc.IsClosed)
-                throw new Exception("Hesap zaten kapalı");
-
-            // İstersen bunu kaldırabilirsin; ama bankacılık mantığında genelde 0 olmalı
-            if (acc.Balance != 0)
-                throw new Exception("Bakiye sıfır olmadan hesap kapatılamaz");
+                throw new InvalidOperationException("Hesap zaten kapalı");
 
             acc.IsClosed = true;
             acc.ClosedAt = DateTime.UtcNow;
 
             await _db.SaveChangesAsync();
+
+            // Alert oluştur
+            await _alerts.CreateAccountClosedAlertAsync(userId, acc.Name, acc.Currency, acc.Balance);
         }
 
         // ✅ (TRANSFER / MEVDUAT İÇİN) Bu kullanıcıya ait hesabı getir

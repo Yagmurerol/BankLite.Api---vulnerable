@@ -95,5 +95,11 @@ namespace BankLite.Api.Services
             var message = $"Yeni hesabınız başarıyla açıldı! Hesap: {accountName}, Para Birimi: {currency}, Başlangıç Bakiyesi: {initialBalance:N2} {currency}";
             await CreateAlertAsync(userId, AlertType.Info, "🎉 Yeni Hesap Açıldı", message);
         }
+
+        public async Task CreateAccountClosedAlertAsync(int userId, string accountName, string currency, decimal finalBalance)
+        {
+            var message = $"Hesabınız kapatıldı. Hesap: {accountName}, Para Birimi: {currency}, Son Bakiye: {finalBalance:N2} {currency}";
+            await CreateAlertAsync(userId, AlertType.Info, "🔒 Hesap Kapatıldı", message);
+        }
     }
 }
