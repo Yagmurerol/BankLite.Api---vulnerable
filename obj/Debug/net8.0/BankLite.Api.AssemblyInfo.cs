@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("BankLite.Api")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+7dd8495f0e21f4a2e79cf85b9370121ab49dbdd0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+d98f598870458a2f10cbb44d8b790d2a6207bdb7")]
 [assembly: System.Reflection.AssemblyProductAttribute("BankLite.Api")]
 [assembly: System.Reflection.AssemblyTitleAttribute("BankLite.Api")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
